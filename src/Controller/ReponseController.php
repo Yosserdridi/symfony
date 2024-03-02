@@ -54,10 +54,6 @@ class ReponseController extends AbstractController
     }
 
     
-
-
-
-
     #[Route('/reponse/listReponse', name: 'listReponse')]
     public function listReponse(ManagerRegistry $doctrine): Response
     {     
@@ -89,46 +85,46 @@ class ReponseController extends AbstractController
         ]);*/
     }
 
-
-    #[Route('/reponse/deleteReponse/{id}', name: 'deleteReponse')]
-    public function deleteReponse(Request $request, int $id): Response
-    {
-        $em = $this->getDoctrine()->getManager();
-        $reponse = $em->getRepository(Reponse::class)->find($id);
-
+    #[Route('/reponse/deleteReponse/{id}', name: 'deleteReponse', methods:['DELETE'])]
+    public function deleteReponse($id, Request $request, EntityManagerInterface $entityManager): Response
+    { 
+        // Récupérer l'objet Reponse par son identifiant
+        $reponse = $entityManager->getRepository(Reponse::class)->find($id);
+        
+        // Vérifier si l'objet existe
         if (!$reponse) {
-            throw $this->createNotFoundException('Reponse not found');
+            throw $this->createNotFoundException('Aucune réponse trouvée pour l\'identifiant '.$id);
         }
 
-        $em->remove($reponse);
-        $em->flush();
+        // Supprimer l'objet Reponse
+        $entityManager->remove($reponse);
+        $entityManager->flush();
 
-        return $this->redirectToRoute('listReponse');
+        // Rediriger vers une autre page après la suppression
+        return $this->redirectToRoute('listReclamationBack');
     }
 
-
-    #[Route('/reponse/editReponse/{id}', name: 'editReponse')]
-    public function editReponse(Request $request, int $id): Response
-    {
-        $$entityManager = $this->getDoctrine()->getManager();
-        $reponse = $entityManager->getRepository(Reponse::class)->find($id);
-
-        if (!$reponse) {
-            throw $this->createNotFoundException('Reponse not found');
-        }
-
-        $form = $this->createForm(ReponseType::class, $reponse);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) 
+    #[Route('/reponse/editReponse/{id}', name: 'editReponse', methods:['POST'])]
+    public function editReponse(Request $request, $id, EntityManagerInterface $entityManager): Response{
         {
-            $em->flush();
-            return $this->redirectToRoute('listReponse');
+            $reponse = $entityManager->getRepository(Reponse::class)->find($id);
+            $form = $this->createForm(ReponseType::class, $reponse);
+            $form->handleRequest($request);
+
+
+            if ($form->isSubmitted() && $form->isValid()) 
+            {
+                $em = $this->getDoctrine()->getManager();
+                $em->flush();
+                return $this->redirectToRoute('listReclamationBack');
         }
 
-        return $this->render('reponse/editReponse.html.twig', [
-            'form' => $form->createView(),
-        ]);
+            return $this->render('reponse/editReponse.html.twig', [
+                'form' => $form->createView(),
+                'reponse' => $reponse,
+            ]);
+    }
+    
     }
 
     public function getReponsesByReclamation($reclamationId)

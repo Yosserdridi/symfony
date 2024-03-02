@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,14 +81,13 @@ class ReclamationBackController extends AbstractController
         ]);
     }
 
-
-    #[Route('/reclamation/back/delete{id}', name: 'deleteReclamationBack')]
-    public function deleteReclamationBack(Request $request, Reclamation $reclamation): Response
-    {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($reclamation);
-        $em->flush();
-
+    #[Route('/reclamation/back/deleteReclamation/{id}', name: 'listReclamationBack', methods:['DELETE'])]
+    public function deleteReclamationBack($id, Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
+    { 
+        
+        $reclamation = $entityManager->getRepository(Reclamation::class)->find($id);
+        $entityManager->remove($reclamation);
+        $entityManager->flush();
 
         return $this->redirectToRoute('listReclamationBack');
     }

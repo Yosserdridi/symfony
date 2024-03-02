@@ -10,6 +10,7 @@ use App\Entity\Reponse;
 use App\Form\ReclamationType; // Make sure to import ReclamationType
 use App\Form\ReponseType;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Form\FormTypeInterface; // Add missing semicolon and import statement
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,37 +74,38 @@ class ReclamationController extends AbstractController
         ]);
     }
     
-    
-
-
    
 
-    #[Route('/reclamation/deleteReclamation/{id}', name: 'deleteReclamation')]
-    public function deleteReclamation(Request $request, Reclamation $reclamation): Response
-    {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($reclamation);
-        $em->flush();
+    #[Route('/reclamation/deleteReclamation/{id}', name: 'deleteReclamation', methods:['DELETE'])]
+            public function deleteReclamation($id, Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
+            {
+                $reclamation = $entityManager->getRepository(Reclamation::class)->find($id);
+                $entityManager->remove($reclamation);
+                $entityManager->flush();
 
-        return $this->redirectToRoute('listReclamation');
-    }
+                return $this->redirectToRoute('listReclamation');
+            }
 
-    #[Route('/reclamation/editReclamation/{id}', name: 'editReclamation')]
-    public function editReclamation(Request $request, Reclamation $reclamation): Response
-    {
-        $form = $this->createForm(ReclamationType::class, $reclamation);
-        $form->handleRequest($request);
+        #[Route('/reclamation/editReclamation/{id}', name: 'editReclamation', methods:['POST'])]
+        public function editReclamation(Request $request, $id, EntityManagerInterface $entityManager): Response{
+            {
+                $reclamation = $entityManager->getRepository(Reclamation::class)->find($id);
+                $form = $this->createForm(ReclamationType::class, $reclamation);
+                $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) 
-        {
-            $em = $this->getDoctrine()->getManager();
-            $em->flush();
-            return $this->redirectToRoute('listReclamation');
+
+                if ($form->isSubmitted() && $form->isValid()) 
+                {
+                    $em = $this->getDoctrine()->getManager();
+                    $em->flush();
+                    return $this->redirectToRoute('listReclamation');
+            }
+
+                return $this->render('reclamation/editReclamation.html.twig', [
+                    'form' => $form->createView(),
+                    'reclamation' => $reclamation,
+                ]);
         }
-
-        return $this->render('reclamation/editReclamation.html.twig', [
-            'form' => $form->createView(),
-            'reclamation' => $reclamation,
-        ]);
-    }
+        
+        }
 }

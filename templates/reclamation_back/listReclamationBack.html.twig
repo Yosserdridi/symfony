@@ -3,49 +3,85 @@
 {% block title %}GAMI{% endblock %}
 
 {% block body %}
+<script src="{{ asset('js/jquery.js') }}"></script>
     <div class="container">
         <h1>Liste des réclamations</h1>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Titre</th>
-                    <th>Contenu</th>
-                    <th>Date</th>
-                    <th>Actions des réclamations</th>
-                    <th>Réponses</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for reclamation in reclamations %}
+        <div class="table-responsive">
+        <input type="search" class="form-control" placeholder="Chercher" id="search" aria-label="Search Dashboard">
+            <table class="table table-bordered table-striped" id="tableac">
+            
+                <thead class="thead-dark">
                     <tr>
-                        <td>{{ reclamation.TitreRec }}</td>
-                        <td>{{ reclamation.ContenuRec }}</td>
-                        <td>{{ reclamation.DateRec ? reclamation.DateRec.format('Y-m-d H:i:s') : '' }}</td>
-                        <td>
-                            <a href="{{ path('deleteReclamationBack', {'id': reclamation.id}) }}" class="btn btn-danger">Delete</a>
-                        </td>
-
-                        <td>
-                            <!-- Form for adding a response -->
-                            <form method="POST" action="{{ path('addreponse') }}" class="reponse-form">
-                                <label for="contenuRep">Contenu de la réponse</label>
-                                <input type="text" name="contenuRep">
-                                <input type="hidden" name="reclamationId" value="{{ reclamation.id }}">
-                                <button type="submit">Ajouter une réponse</button>
-                            </form>
-
-                            <ul class="reponses-list">
-                                {% for reponse in reclamation.reponses %}
-                                    <li>{{ reponse.contenuRep }}</li>
-                                    <div class="reponse-actions">
-                                        <!-- Actions des réponses -->
-                                    </div>
-                                {% endfor %}
-                            </ul>
-                        </td>
+                        <th scope="col">Titre</th>
+                        <th scope="col">Contenu</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Actions des réclamations</th>
+                        <th scope="col">Réponses</th>
+                        <th scope="col">Actions des réponses</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for reclamation in reclamations %}
+                        <tr>
+                            <td>{{ reclamation.TitreRec }}</td>
+                            <td>{{ reclamation.ContenuRec }}</td>
+                            <td>{{ reclamation.DateRec ? reclamation.DateRec.format('Y-m-d H:i:s') : '' }}</td>
+                            <td>
+                                <a href="{{ path('deleteReclamationBack', {'id': reclamation.id}) }}" class="btn btn-danger">Supprimer</a>
+                            </td>
+                            <td>
+                                <!-- Form for adding a response -->
+                                <form method="POST" action="{{ path('addreponse') }}" class="reponse-form">
+                                    <div class="form-group">
+                                        <label for="contenuRep">Contenu de la réponse</label>
+                                        <input type="text" class="form-control" name="contenuRep">
+                                        <input type="hidden" name="reclamationId" value="{{ reclamation.id }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Ajouter une réponse</button>
+                                </form>
+                                <ul class="list-group mt-2">
+                                    {% for reponse in reclamation.reponses %}
+                                        <li class="list-group-item">
+                                            {{ reponse.contenuRep }}
+                                            <div class="reponse-actions mt-1">
+                                                <!-- Actions des réponses -->
+                                                 <td>
+                                                <a href="{{ path('deleteReponse', {'id': reponse.id}) }}" class="btn btn-danger">Supprimer</a>
+                                                <a href="{{ path('editReponse', {'id': reponse.id}) }}" class="btn btn-primary">Éditer</a>
+                                                 </td>
+                                            </div>
+
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+    <script>
+        $(document).ready(function(){
+            $('#search').keyup(function(){
+                search_table($(this).val());
+            });
+            function search_table(value){
+                $('#tableac tbody tr').each(function(){
+                    var found = false;
+                    $(this).find('td:nth-child(2), td:nth-child(3)').each(function(){ 
+                        if($(this).text().toLowerCase().includes(value.toLowerCase())){
+                            found = true;
+                            return false; 
+                        }
+                    });
+                    if(found){
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

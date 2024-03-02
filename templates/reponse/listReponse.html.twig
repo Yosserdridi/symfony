@@ -41,6 +41,7 @@
                     <td>{{ reponse.dateRep ? reponse.dateRep.format('Y-m-d H:i:s') : '' }}</td>
                     <td>{{ reponse.reclamation ? reponse.reclamation.contenuRec }}</td>
                     <td>
+
                         <a href="{{ path('deleteReponse', {'id': reponse.id}) }}" class="btn btn-danger">Delete</a>
                         <a href="{{ path('editReponse', {'id': reponse.id}) }}" class="btn btn-primary">Edit</a>
                     </td>
